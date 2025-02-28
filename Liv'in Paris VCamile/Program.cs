@@ -1,68 +1,68 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
-class Node
+class Noeud
 {
     public int Id { get; set; }
-    public List<Node> Neighbors { get; set; } = new List<Node>();
+    public List<Noeud> Adjacents { get; set; } = new List<Noeud>();
 
-    public Node(int id)
+    public Noeud(int id)
     {
         Id = id;
     }
 }
 
-class Graph
+class Graphe
 {
-    private Dictionary<int, Node> nodes = new Dictionary<int, Node>();
-    private int[,] adjacencyMatrix;
+    private Dictionary<int, Noeud> noeuds = new Dictionary<int, Noeud>();
+    private int[,] Matriceadjacence;
 
-    public void AddNode(int id)
+    public void AjouteNoeud(int id)
     {
-        if (!nodes.ContainsKey(id))
-            nodes[id] = new Node(id);
+        if (!noeuds.ContainsKey(id))
+            noeuds[id] = new Noeud(id);
     }
 
-    public void AddEdge(int id1, int id2)
+    public void AjouteLien(int id1, int id2)
     {
-        if (nodes.ContainsKey(id1) && nodes.ContainsKey(id2))
+        if (noeuds.ContainsKey(id1) && noeuds.ContainsKey(id2))
         {
-            nodes[id1].Neighbors.Add(nodes[id2]);
-            nodes[id2].Neighbors.Add(nodes[id1]);
+            noeuds[id1].Adjacents.Add(noeuds[id2]);
+            noeuds[id2].Adjacents.Add(noeuds[id1]);
         }
     }
 
-    public void BuildAdjacencyMatrix()
+    public void Matrice_Adjacence()
     {
-        int size = nodes.Count;
-        adjacencyMatrix = new int[size, size];
-        foreach (var node in nodes.Values)
+        int size = noeuds.Count;
+        Matriceadjacence = new int[size, size];
+        foreach (var noeud in noeuds.Values)
         {
-            foreach (var neighbor in node.Neighbors)
+            foreach (var adjacent in noeud.Adjacents)
             {
-                adjacencyMatrix[node.Id - 1, neighbor.Id - 1] = 1;
-                adjacencyMatrix[neighbor.Id - 1, node.Id - 1] = 1;
+                Matriceadjacence[noeud.Id - 1, adjacent.Id - 1] = 1;
+                Matriceadjacence[adjacent.Id - 1, noeud.Id - 1] = 1;
             }
         }
     }
 
     public void BFS(int start)
     {
-        HashSet<int> visited = new HashSet<int>();
+        HashSet<int> parcouru = new HashSet<int>();
         Queue<int> queue = new Queue<int>();
         queue.Enqueue(start);
-        visited.Add(start);
+        parcouru.Add(start);
 
         while (queue.Count > 0)
         {
             int nodeId = queue.Dequeue();
             Console.Write(nodeId + " ");
-            foreach (var neighbor in nodes[nodeId].Neighbors)
+            foreach (var neighbor in noeuds[nodeId].Adjacents)
             {
-                if (!visited.Contains(neighbor.Id))
+                if (!parcouru.Contains(neighbor.Id))
                 {
-                    visited.Add(neighbor.Id);
+                    parcouru.Add(neighbor.Id);
                     queue.Enqueue(neighbor.Id);
                 }
             }
@@ -72,85 +72,85 @@ class Graph
 
     public void DFS(int start)
     {
-        HashSet<int> visited = new HashSet<int>();
+        HashSet<int> parcouru = new HashSet<int>();
         Stack<int> stack = new Stack<int>();
         stack.Push(start);
 
         while (stack.Count > 0)
         {
-            int nodeId = stack.Pop();
-            if (!visited.Contains(nodeId))
+            int Idnoeud = stack.Pop();
+            if (!parcouru.Contains(Idnoeud))
             {
-                Console.Write(nodeId + " ");
-                visited.Add(nodeId);
-                foreach (var neighbor in nodes[nodeId].Neighbors)
+                Console.Write(Idnoeud + " ");
+                parcouru.Add(Idnoeud);
+                foreach (var adjacent in noeuds[Idnoeud].Adjacents)
                 {
-                    stack.Push(neighbor.Id);
+                    stack.Push(adjacent.Id);
                 }
             }
         }
         Console.WriteLine();
     }
 
-    public void LoadFromFile(string filePath)
+    public void ReadFile(string cheminfichier)
     {
-        using (StreamReader sr = new StreamReader(filePath))
+        using (StreamReader sr = new StreamReader(cheminfichier))
         {
-            string line;
-            while ((line = sr.ReadLine()) != null)
+            string ligne;
+            while ((ligne = sr.ReadLine()) != null)
             {
-                if (line.StartsWith("%") || line.StartsWith("%%"))
+                if (ligne.StartsWith("%") || ligne.StartsWith("%%"))
                     continue;
 
-                string[] parts = line.Split(' ');
-                if (parts.Length == 2)
+                string[] parties = ligne.Split(' ');
+                if (parties.Length == 2)
                 {
-                    int node1 = int.Parse(parts[0]);
-                    int node2 = int.Parse(parts[1]);
+                    int noeud1 = int.Parse(parties[0]);
+                    int noeud2 = int.Parse(parties[1]);
 
-                    AddNode(node1);
-                    AddNode(node2);
-                    AddEdge(node1, node2);
+                    AjouteNoeud(noeud1);
+                    AjouteNoeud(noeud2);
+                    AjouteLien(noeud1, noeud2);
                 }
             }
         }
     }
 
-    public bool IsConnected()
+    public bool EstConnecté()
     {
-        if (nodes.Count == 0) return false;
+        if (noeuds.Count == 0) return false;
 
-        HashSet<int> visited = new HashSet<int>();
+        HashSet<int> parcouru = new HashSet<int>();
         Queue<int> queue = new Queue<int>();
 
-        int startNode = nodes.Keys.First();
-        queue.Enqueue(startNode);
-        visited.Add(startNode);
+        int Depart = noeuds.Keys.First();
+        queue.Enqueue(Depart);
+        parcouru.Add(Depart);
 
         while (queue.Count > 0)
         {
-            int nodeId = queue.Dequeue();
-            foreach (var neighbor in nodes[nodeId].Neighbors)
+            int Idnoeud = queue.Dequeue();
+            foreach (var adjacent in noeuds[Idnoeud].Adjacents)
             {
-                if (!visited.Contains(neighbor.Id))
+                if (!parcouru.Contains(adjacent.Id))
                 {
-                    visited.Add(neighbor.Id);
-                    queue.Enqueue(neighbor.Id);
+                    parcouru.Add(adjacent.Id);
+                    queue.Enqueue(adjacent.Id);
                 }
             }
         }
 
-        return visited.Count == nodes.Count;
+        return parcouru.Count == noeuds.Count;
     }
 
 
-    public bool HasCycle()
+    public bool Cycleoupas()
     {
         HashSet<int> visited = new HashSet<int>();
 
-        foreach (var node in nodes.Keys)
+        foreach (var node in noeuds.Keys)
         {
-            if (!visited.Contains(node) && HasCycleDFS(node, visited, -1))
+            if (!visited.Contains(node) && CycleDFS(node, visited, -1))
             {
                 return true;
             }
@@ -158,18 +158,18 @@ class Graph
         return false;
     }
 
-    private bool HasCycleDFS(int current, HashSet<int> visited, int parent)
+    private bool CycleDFS(int debut, HashSet<int> parcouru, int parent)
     {
-        visited.Add(current);
+        parcouru.Add(debut);
 
-        foreach (var neighbor in nodes[current].Neighbors)
+        foreach (var adjacent in noeuds[debut].Adjacents)
         {
-            if (!visited.Contains(neighbor.Id))
+            if (!parcouru.Contains(adjacent.Id))
             {
-                if (HasCycleDFS(neighbor.Id, visited, current))
+                if (CycleDFS(adjacent.Id, parcouru, debut))
                     return true;
             }
-            else if (neighbor.Id != parent) // Si le voisin est déjà visité mais n'est pas le parent, il y a un cycle
+            else if (adjacent.Id != parent) // Si le voisin est déjà visité mais n'est pas le parent, il y a un cycle
             {
                 return true;
             }
@@ -178,18 +178,18 @@ class Graph
     }
 
 
-    public int GetOrder()
+    public int Ordre()
     {
-        return nodes.Count;
+        return noeuds.Count;
     }
 
 
-    public int GetSize()
+    public int Taille()
     {
         int count = 0;
-        foreach (var node in nodes.Values)
+        foreach (var node in noeuds.Values)
         {
-            count += node.Neighbors.Count;
+            count += node.Adjacents.Count;
         }
         return count / 2; // Chaque arête est comptée deux fois
     }
@@ -202,22 +202,22 @@ class Program
 {
     static void Main(string[] args)
     {
-        Graph graph = new Graph();
-        string filePath = "C:\\Users\\ywmoy\\source\\repos\\Liv'in Paris VCamile\\Liv'in Paris VCamile\\bin\\Association-soc-karate.zip"; // Remplace par le chemin réel du fichier
+        Graphe graphe = new Graphe();
+        string filePath = "C:\\Users\\ywmoy\\OneDrive\\Documents\\ESILV\\Année 2\\Pb scien info\\Association-soc-karate\\soc-karate.mtx"; // Remplace par le chemin réel du fichier
 
-        graph.LoadFromFile(filePath);
-        graph.BuildAdjacencyMatrix();
+        graphe.ReadFile(filePath);
+        graphe.Matrice_Adjacence();
 
         Console.WriteLine("Parcours en largeur (BFS) à partir du sommet 1 :");
-        graph.BFS(1);
+        graphe.BFS(1);
 
         Console.WriteLine("Parcours en profondeur (DFS) à partir du sommet 1 :");
-        graph.DFS(1);
+        graphe.DFS(1);
 
-        Console.WriteLine("Le graphe est-il connexe ? " + (graph.IsConnected() ? "Oui" : "Non"));
-        Console.WriteLine("Le graphe contient-il un cycle ? " + (graph.HasCycle() ? "Oui" : "Non"));
-        Console.WriteLine("Ordre du graphe (nombre de sommets) : " + graph.GetOrder());
-        Console.WriteLine("Taille du graphe (nombre d’arêtes) : " + graph.GetSize());
+        Console.WriteLine("Le graphe est-il connexe ? " + (graphe.EstConnecté() ? "Oui" : "Non"));
+        Console.WriteLine("Le graphe contient-il un cycle ? " + (graphe.Cycleoupas() ? "Oui" : "Non"));
+        Console.WriteLine("Ordre du graphe (nombre de sommets) : " + graphe.Ordre());
+        Console.WriteLine("Taille du graphe (nombre d’arêtes) : " + graphe.Taille());
 
     }
 }
