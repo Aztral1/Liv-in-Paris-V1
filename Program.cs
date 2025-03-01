@@ -1,13 +1,21 @@
 ﻿using System;
 
+using System.Collections.Generic;
+
+using System.IO;
+
+using SkiaSharp;
+
+using SkiaSharp.Views.Desktop;
+
 class Program
 {
     static void Main(string[] args)
     {
         Graphe graphe = new Graphe();
-        string filePath = "C:\\Users\\ywmoy\\OneDrive\\Documents\\ESILV\\Année 2\\Pb scien info\\Association-soc-karate\\soc-karate.mtx"; // Remplace par le chemin réel du fichier
+        string cheminfichier = "C:\\Users\\ywmoy\\OneDrive\\Documents\\ESILV\\Année 2\\Pb scien info\\Association-soc-karate\\soc-karate.mtx"; // Remplace par le chemin réel du fichier
 
-        graphe.ReadFile(filePath);
+        graphe.ReadFile(cheminfichier);
         graphe.Matrice_Adjacence();
 
         Console.WriteLine("Matrice d'adjacence :");
@@ -23,5 +31,9 @@ class Program
         Console.WriteLine("Le graphe contient-il un cycle ? " + (graphe.Cycleoupas() ? "Oui" : "Non"));
         Console.WriteLine("Ordre du graphe (nombre de sommets) : " + graphe.Ordre());
         Console.WriteLine("Taille du graphe (nombre d’arêtes) : " + graphe.Taille());
+        string cheminImage = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "graphe.png");
+        graphe.DessinerGrapheAvecSkiaSharp(cheminImage);
+
+
     }
 }
